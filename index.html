@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1220"><meta name="description" content="ルービックキューブをグラフ理論で解く実験室。3Dキューブを回し、双方向BFSで最短経路を発見しよう。"><title>CUBE / GRAPH — グラフ理論でキューブを解く</title></head>
+<body>
+<header><a class="brand" href="#"><span class="brand-mark">▧</span> CUBE <span>/</span> GRAPH</a><nav aria-label="メイン"><a href="#lab">実験室</a><a href="#theory">しくみ</a><a href="https://github.com/Gazelle221B/cube-graph-lab">GitHub ↗</a></nav></header>
+<main>
+<section class="intro"><h1>キューブを解く。<br class="mobile-break"><span>グラフをたどる。</span></h1><p>1つの状態が頂点。1回の回転が辺。完成までの道を探そう。</p></section>
+<section id="lab" class="lab" aria-label="キューブとグラフの実験室">
+<div class="cube-panel"><div class="panel-heading"><h2><span>01</span> キューブを動かす</h2><span id="cube-status" class="status">シャッフル済み</span></div>
+<div class="cube-stage"><svg id="cube" viewBox="0 0 480 320" role="img" aria-label="現在の3×3キューブ"></svg></div>
+<div class="view-row"><span>表示する3面</span><button id="view-front" class="quiet selected" aria-pressed="true">U・F・R</button><button id="view-back" class="quiet" aria-pressed="false">D・B・L</button><label class="letter-toggle"><input type="checkbox" id="letters" checked> 色に文字を表示</label></div>
+<div id="moves" class="move-grid" aria-label="面を回転"></div><p class="hint">各面を正面から見て時計回り。′ は逆回転、2 は180°。</p>
+<div class="shuffle-row"><label for="depth">シャッフル</label><select id="depth"><option value="2">2手 / 入門</option><option value="4" selected>4手 / 基本</option><option value="6">6手 / 挑戦</option><option value="20">20手 / 深い探索</option></select><button id="shuffle">混ぜる</button><button id="reset" class="quiet">リセット</button></div>
+<p class="sequence">操作列 <span id="scramble-text"></span></p>
+<details class="notation"><summary>手順を入力して試す</summary><form id="sequence-form"><label for="sequence">現在の状態に適用する手順</label><div><input id="sequence" placeholder="R U R' U'" maxlength="300" autocomplete="off" spellcheck="false"><button type="submit">適用</button></div><p id="input-error" role="alert"></p></form></details>
+</div>
+<div class="graph-panel"><div class="panel-heading"><h2><span>02</span> 最短の道を探す</h2><span class="metric">HTM / 180°も1手</span></div>
+<div class="graph-heading"><span class="start-key">● 開始側</span><span class="goal-key">● 完成側</span><span class="path-key">━ 解の経路</span></div>
+<div class="graph-stage"><svg id="graph" viewBox="0 0 600 310" role="img" aria-label="探索した状態グラフ"></svg><p id="graph-caption">両端から探索を広げ、出会う場所を探します。</p></div>
+<div class="search-controls"><label class="sr-only" for="mode">探索アルゴリズム</label><select id="mode"><option value="bfs">双方向BFS / 最短6手以内</option><option value="two-phase">二段階探索 / 深い問題</option></select><button id="solve" class="primary">経路を探す <span>→</span></button><button id="cancel" hidden>中止</button></div>
+<p id="search-status" class="search-status" role="status" aria-live="polite">まずは4手の問題から。最短で何手になるでしょう？</p>
+<div id="result" hidden><div class="result-heading"><strong id="result-title"></strong><span id="visited"></span></div><div class="playback"><button id="prev" aria-label="1手戻る">←</button><button id="play">自動再生</button><button id="next" aria-label="1手進む">→</button><label for="speed" class="sr-only">再生速度</label><select id="speed"><option value="1000">ゆっくり</option><option value="450">はやく</option></select><output id="step-count"></output></div><div id="path" class="path" aria-label="解法の各ステップ"></div></div>
+<div class="search-note"><span>探索のルール</span><p>同じ状態は一度だけ調べる。近い状態から順に探す。<br>表示するのは巨大なグラフの、ほんの一部分です。</p></div>
+</div></section>
+<section id="theory" class="theory"><div class="section-heading"><h2>「解く」を、道探しに言い換える。</h2><p>キューブの見方を変える、3つのアイデア。</p></div><div class="ideas">
+<article><svg viewBox="0 0 280 78" aria-label="異なる状態は異なる頂点"><circle cx="65" cy="38" r="17"/><circle cx="140" cy="38" r="17"/><circle cx="215" cy="38" r="17"/><text x="65" y="43">A</text><text x="140" y="43">B</text><text x="215" y="43">C</text></svg><h3>状態 = 頂点</h3><p>色の配置が1つ決まると、頂点が1つ決まります。正しく組まれた3×3キューブの状態は約4,325京通り。</p></article>
+<article><svg viewBox="0 0 280 78" aria-label="回転Rとその逆回転でつながる2頂点"><path d="M73 38H208"/><circle cx="65" cy="38" r="10"/><circle cx="215" cy="38" r="10"/><text x="140" y="26">R →</text><text x="140" y="65">← R′</text></svg><h3>回転 = 辺</h3><p>U・R・F・D・L・Bの6面に、90°・逆90°・180°の3通り。各頂点から18本の辺が伸び、逆回転で戻れます。</p></article>
+<article><svg viewBox="0 0 280 78" aria-label="開始から完成へ向かう最短経路"><path d="M35 50L100 22L175 50L245 22"/><circle cx="35" cy="50" r="7"/><circle cx="100" cy="22" r="7"/><circle cx="175" cy="50" r="7"/><circle cx="245" cy="22" r="7"/></svg><h3>解法 = 経路</h3><p>現在地から完成状態への経路が解法です。すべての辺を1手と数えると、最短経路が最少手数の解になります。</p></article>
+</div>
+<div class="experiment"><div><h3>順番を変えても、同じ場所に着く？</h3><p>回転は掛け算のような操作。でも順番を交換できるとは限りません。</p></div><div class="experiment-actions"><button data-experiment="R U">R → U を試す</button><button data-experiment="U R">U → R を試す</button></div><p id="experiment-result" aria-live="polite">完成状態から2つの順番を試し、キューブの色を見比べてみよう。</p></div>
+<details class="math"><summary>なぜ最短と言える？ グラフ理論をもう一歩</summary><p>頂点集合 V は実現可能な配置、生成集合 S は18種類の面回転です。辺は g と gs を結びます。これはキューブ群のケイリーグラフです。</p><math display="block"><mi>G</mi><mo>=</mo><mo>(</mo><mi>V</mi><mo>,</mo><mi>E</mi><mo>)</mo><mo>,</mo><mspace width="1em"/><mi>E</mi><mo>=</mo><mo>{</mo><mo>(</mo><mi>g</mi><mo>,</mo><mi>g</mi><mi>s</mi><mo>)</mo><mo>∣</mo><mi>g</mi><mo>∈</mo><mi>V</mi><mo>,</mo><mi>s</mi><mo>∈</mo><mi>S</mi><mo>}</mo></math><p>幅優先探索（BFS）は距離の小さい順に頂点を調べます。双方向BFSでは開始側と完成側から1層ずつ交互に広げ、初めて交わる最小距離の経路を復元します。この実験では片側3層、合計6手までを調べます。</p><p>6手以内で見つからなくても、解がないわけではありません。すべての合法状態はHTMで20手以内に解けることが知られていますが、全探索には膨大な計算が必要です。「二段階探索」は部分群を経由して効率よく解を見つけますが、最短性は保証しません。</p><p>同じ面を続けて回す操作は1手以下にまとめられるため探索から除外します。図は発見した辺の抜粋と解の経路で、全状態の地図ではありません。</p><p>出典：<a href="https://www.cube20.org/">God’s Number is 20</a> / <a href="https://kociemba.org/math/imptwophase.htm">Kociemba’s Two-Phase Algorithm</a></p></details>
+</section>
+</main><footer><span>CUBE / GRAPH</span><p>回して、予想して、確かめる。ブラウザだけで動く数学の実験室。</p><a href="https://github.com/Gazelle221B/cube-graph-lab">ソースコード ↗</a></footer>
+<script type="module" src="/src/main.js"></script></body></html>
