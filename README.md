@@ -23,3 +23,7 @@ GitHub Actionsでテスト・ビルド後、GitHub Pagesへデプロイ。Vite�
 
 数学: [Cube group](https://en.wikipedia.org/wiki/Rubik%27s_Cube_group)、[God’s number](https://www.cube20.org/)、[Two-phase algorithm](https://kociemba.org/math/imptwophase.htm)。
 実装依存: [cubejs](https://github.com/ldez/cubejs)（MIT）、[Vite](https://vite.dev/)（MIT）。
+
+## 依存の最小化
+
+cubejs 1.3.2の実行に必要な2モジュール・MITライセンスを `vendor/cubejs/` に同梱（外側のCommonJSラッパーのみES Modulesへ変換。アルゴリズム変更なし）。npm配布物に含まれる不要な旧npm依存を除き、インストール依存はViteのみです。
