@@ -13,16 +13,24 @@ test('cube moves, parser, exact shortest paths, deeper-state bound and two-phase
   assert.throws(() => parseMoves('R<script>'));
   assert.throws(() => parseMoves('R'.repeat(101)));
   assert.equal(shortestPath(SOLVED).moves.length, 0);
-  // Independent one-sided breadth-first distances through depth 2.
+  // Independent one-sided breadth-first distances through depth 4.
   const distances = new Map([[SOLVED, 0]]);
   for (const [state, depth] of distances) {
-    if (depth === 2) continue;
+    if (depth === 4) continue;
     for (const move of MOVES) {
       const next = apply(state, move);
       if (!distances.has(next)) distances.set(next, depth + 1);
     }
   }
-  for (const [state, distance] of distances) assert.equal(shortestPath(state).moves.length, distance);
+  let sample = 0;
+  for (const [state, distance] of distances) {
+    if (distance <= 2 || sample++ % 149 === 0) {
+      const result = shortestPath(state);
+      assert.equal(result.moves.length, distance);
+      assert.equal(apply(state, result.moves), SOLVED);
+      assert.equal(Cube.fromString(state).asString(), state);
+    }
+  }
   for (const sequence of ['R U F', 'R U F L', 'R U F L D', 'R U F L D B']) {
     const state = apply(SOLVED, sequence), result = shortestPath(state);
     assert.equal(apply(state, result.moves), SOLVED);

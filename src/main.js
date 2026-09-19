@@ -36,7 +36,7 @@ function clearSolution() {
 }
 function change(next, moves) {
   if (busy) return;
-  state=next; history=moves; clearSolution(); render();
+  state=next; history=moves; $('input-error').textContent=''; clearSolution(); render();
 }
 function shuffleCube() {
   const moves=scramble(Number($('depth').value));
